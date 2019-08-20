@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nikey.mapper.GroupInfoMapper">
+	
+	<select id="getGroupCompanyInfo" resultType="short">
+	<![CDATA[
+		SELECT  tp.group_Id
+		FROM  tb_point_group_tree  tp
+		WHERE  tp.company_Id=#{companyId}
+		AND tp.group_type=1
+	]]>
+	</select>
+	
+	<select id="getCompanyIdByGroupId" resultType="short">
+	<![CDATA[
+        SELECT tp.company_Id from tb_point_group_tree tp where tp.group_Id=#{groudId}
+	]]>
+	</select>
+	
+	<insert id="insertPchage" flushCache="true" statementType="PREPARED">
+		INSERT INTO tb_monitory_point_info_change (
+		    id,
+		    device_id,
+		    device_name,
+		    ctr,
+		    ptr,
+		    standardU,
+		    is_phase_voltage,
+		    install_addr,
+		    insert_time,
+		    customer_Id
+		)
+		VALUES
+		<foreach item="item" index="index" collection="list" open="" separator="," close="">
+		  (#{item.id}, #{item.device_id}, #{item.device_name}, #{item.ctr}, #{item.ptr}, #{item.standardU}, #{item.is_phase_voltage}, #{item.install_addr}, from_unixtime(#{item.insert_time}/1000), #{item.device_id}/1000)
+		</foreach>
+	</insert>
+	
+</mapper>

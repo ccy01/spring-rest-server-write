@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nikey.mapper.AlarmMapper">
+
+    <resultMap id="alarmsetThresholdMap" type="com.nikey.bean.AlarmsetThreshold">
+        <result column="device_id" property="powerId"/>
+        <result column="event_id" property="eventId"/>
+        <result column="max" property="max"/>
+        <result column="min" property="min"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="power_id" property="deviceId"/>
+        <result column="is_group" property="isGroup"/>
+        <result column="alarm_event_type_name" property="alarmTypeName"/>
+        <result column="alarm_event_type_id" property="alarmEventId"/>
+    </resultMap>
+    
+    <resultMap type="com.nikey.bean.AlarmReceiver" id="AlarmReceiverMap">
+        <result column="alarm_company_id" property="companyId"/>
+        <result column="phone_number" property="phoneNumber"/>
+    </resultMap>
+    
+    <select id="getPhoneNumber" resultMap="AlarmReceiverMap">
+        SELECT
+            alarm_company_id,
+            phone_number
+        FROM
+            tb_alarm_sms_phone,
+            tb_customer_info
+        WHERE
+            alarm_company_id = customer_Id
+    </select>
+    
+    <select id="getAlarmTypeNames" resultMap="alarmsetThresholdMap">
+		SELECT
+		    alarm_event_type_id,
+		    alarm_event_type_name
+		FROM
+		    tb_alarm_event_type
+		WHERE
+		    alarm_event_type_id = 11014 OR alarm_event_type_id=21008
+    </select>
+    
+    <select id="getAlarmsetThresholds" resultMap="alarmsetThresholdMap">
+        SELECT
+            t.device_id,
+            t.event_id,
+            t.max,
+            t.min,
+            t.customer_id,
+            p.power_id,
+            p.is_group
+        FROM
+            tb_alarmset_threshold t,
+            tb_power_info p
+        WHERE
+            p.id = t.device_id
+        AND t.is_group = 2
+        AND t.event_id IN (11014, 21008)
+    </select>
+    
+    <resultMap id="alarmCounterMap" type="com.nikey.bean.AlarmCounter">
+        <result column="power_id" property="powerId"/>
+        <result column="insert_Time" property="insertTime"/>
+        <result column="event_Id" property="eventId"/>
+        <result column="count" property="count"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="time_type" property="timeType"/>
+        <result column="device_id" property="deviceId"/>
+    </resultMap>
+    
+    <select id="getAlarmCounters" resultMap="alarmCounterMap">
+        SELECT
+		    t.device_id as power_id,
+		    t.insert_Time,
+		    t.event_Id,
+		    t.count,
+		    t.customer_id,
+		    t.time_type,
+		    p.power_id as device_id
+		FROM
+		    tb_realtime_alarm_count t,
+		    tb_power_info p
+		WHERE
+		    p.id = t.device_id
+		AND t.is_group = 2
+		AND t.event_id IN (11014, 21008)
+    </select>
+    
+    <insert id="insertAlarmCounter" parameterType="com.nikey.bean.AlarmCounter" flushCache="true" statementType="PREPARED">
+        INSERT INTO tb_realtime_alarm_count (
+		    device_id,
+		    insert_Time,
+		    time_type,
+		    event_Id,
+		    count,
+		    customer_id,
+		    is_group
+		)
+		VALUES
+		    (#{powerId}, #{insertTime}, #{timeType}, #{eventId}, #{count}, #{customerId}, 2) 
+		ON DUPLICATE KEY UPDATE insert_Time = #{insertTime}, count = #{count}, customer_id = #{customerId}, is_group = 2
+    </insert>
+    
+    <insert id="insertRealtimeAlarm" parameterType="com.nikey.bean.RealtimeAlarm" flushCache="true" statementType="PREPARED">
+        INSERT INTO tb_realtime_alarm (
+		    monitory_point_id,
+		    event_Time,
+		    event_Id,
+		    current_Value,
+		    customer_id,
+		    is_group,
+		    threshold_Value
+		)
+		VALUES
+		    (#{deviceId}, #{eventTime}, #{eventId}, #{currentValue}, #{customerId}, #{isGroup}, #{thresholdValue})
+		ON DUPLICATE KEY UPDATE
+		    event_Time = #{eventTime},
+		    current_Value = #{currentValue},
+		    customer_id = #{customerId},
+		    threshold_Value = #{thresholdValue}
+    </insert>
+    
+    <delete id="clearDayCounter">
+        DELETE FROM tb_realtime_alarm_count
+        WHERE 
+            event_id IN (11014, 21008)
+        AND
+            time_type = 0
+    </delete>
+    
+    <delete id="clearSpecificDayCounter">
+        DELETE FROM tb_realtime_alarm_count
+        WHERE 
+            event_id IN (11014, 21008)
+        AND
+            time_type = 0
+        AND
+            device_id = #{device_id}
+        AND
+            customer_id = #{customer_id}
+    </delete>
+    
+    <delete id="clearMonthCounter">
+        DELETE FROM tb_realtime_alarm_count
+        WHERE 
+            event_id IN (11014, 21008)
+        AND
+            time_type = 1
+    </delete>
+    
+    <delete id="clearSpecificMonthCounter">
+        DELETE FROM tb_realtime_alarm_count
+        WHERE 
+            event_id IN (11014, 21008)
+        AND
+            time_type = 1
+        AND
+            device_id = #{device_id}
+        AND
+            customer_id = #{customer_id}
+    </delete>
+</mapper>

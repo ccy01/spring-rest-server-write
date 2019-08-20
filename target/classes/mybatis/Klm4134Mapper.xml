@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nikey.mapper.Klm4134Mapper">
+
+    <resultMap id="ResultMapOfKLM" type="hashmap">
+        <result column="temperature_point_id" property="temperature_point_id"/>
+        <result column="temperature_point_name" property="temperature_point_name"/>
+        <result column="customer_Id" property="customer_Id"/>
+        <result column="position" property="position"/>
+        <result column="is_electric" property="is_electric"/>
+        <result column="quailfier" property="quailfier"/>
+        <result column="real_temperature_point_id" property="real_temperature_point_id"/>
+    </resultMap>
+    
+    <select id="getTemperatureTypeById" resultType="Integer">
+	<![CDATA[
+        SELECT  
+            tpr.type
+        FROM
+		    tb_temperature_point tp ,tb_temperature_point_relation tpr
+        WHERE
+            tp.temperature_point_id=#{id}
+        AND
+            tp.temperature_point_id =tpr.tb_temperature_point_id
+
+LIMIT 0,1
+	]]>
+    </select>
+    
+    <select id="getQualifierById" resultType="string">
+        <![CDATA[
+            SELECT
+                quailfier
+            FROM
+                tb_temperature_point
+            WHERE
+                temperature_point_id = #{id}
+        ]]>
+    </select>
+	
+</mapper>

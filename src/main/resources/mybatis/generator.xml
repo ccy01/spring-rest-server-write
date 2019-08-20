@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+	<!-- classPathEntry:数据库的JDBC驱动 -->
+	<classPathEntry
+		location="/home/jayzee/Documents/Technique/Java/Jars/mysql/mysql-connector-java-5.1.17-bin.jar" />
+
+	<context id="MySQLTables" targetRuntime="MyBatis3">
+		
+		<!-- plugin插件 -->
+		<plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+	
+		<!-- 去除自动生成的注释 -->
+		<commentGenerator>
+			<property name="suppressAllComments" value="true" />
+		</commentGenerator>
+		<!--03 server  -->
+		 <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://192.168.0.3:3306/neem_hanyang_v2" userId="root"
+			password="123456">
+		</jdbcConnection> 
+
+		<javaTypeResolver>
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+
+		<!-- targetProject:自动生成代码的位置 -->
+		<javaModelGenerator targetPackage="com.gx.model.OverAll"
+			targetProject="DSPMSU_EXT">
+			<property name="enableSubPackages" value="true" />
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+		<sqlMapGenerator targetPackage="com.gx.model.OverAll"
+			targetProject="DSPMSU_EXT">
+			<property name="enableSubPackages" value="true" />
+		</sqlMapGenerator>
+
+		<javaClientGenerator type="XMLMAPPER"
+			targetPackage="com.gx.model.OverAll" targetProject="DSPMSU_EXT">
+			<property name="enableSubPackages" value="true" />
+		</javaClientGenerator>
+
+		<!-- tableName:用于自动生成代码的数据库表；domainObjectName:对应于数据库表的javaBean类名 -->
+		<table tableName="pointinfo_change" domainObjectName="PointinfoChange">
+			<property name="useActualColumnNames" value="true" />
+		</table>
+		
+
+	</context>
+
+</generatorConfiguration>

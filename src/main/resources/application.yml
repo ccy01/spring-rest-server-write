@@ -1,0 +1,44 @@
+server:
+    port: 8080
+    tomcat:
+    max-threads: 1000
+    uri-encoding: UTF-8
+    
+spring: 
+    http:
+    encoding:
+    force: true
+    charset: UTF-8
+    enabled: true
+    datasource:
+        name: driverClass
+        url: jdbc:mysql://127.0.0.1:3306/gx_cloud_dev?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;failOverReadOnly=false&amp;maxReconnects=10
+        #url: jdbc:mysql://192.168.1.10:3306/gx_cloud_c2d?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;failOverReadOnly=false&amp;maxReconnects=10
+        #url: jdbc:mysql://120.77.84.101:3306/gx_cloud_dev?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;failOverReadOnly=false&amp;maxReconnects=10
+        type: com.jolbox.bonecp.BoneCPDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        username: root
+        #username: root
+        password:
+        #password: mysqlroot@gx9527
+        idleConnectionTestPeriodInSeconds: 60
+        connectionTestStatement: Select 1
+        idleMaxAge: 240
+        maxConnectionsPerPartition: 30
+        minConnectionsPerPartition: 10
+        partitionCount: 3
+        acquireIncrement: 5
+        statementsCacheSize: 100
+        deregisterDriverOnClose: true
+
+mybatis: 
+    mapperLocations: classpath:mybatis/*Mapper.xml
+    typeAliasesPackage: com.nikey.model
+
+---
+
+spring: 
+    profiles: dev
+    
+server:
+    port: 8090

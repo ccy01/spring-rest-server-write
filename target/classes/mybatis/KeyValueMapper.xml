@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nikey.mapper.KeyValueMapper">
+
+    <select id="get" resultType="string">
+        SELECT redis_value FROM tb_key_value WHERE redis_key = #{key}
+    </select>
+    
+    <insert id="put">
+        INSERT INTO tb_key_value (redis_key, redis_value) VALUES (#{key}, #{value})
+        ON DUPLICATE KEY UPDATE redis_value = #{value}
+    </insert>
+    
+    <delete id="del">
+        DELETE FROM tb_key_value WHERE redis_key = #{key}
+    </delete>
+
+</mapper>

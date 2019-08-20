@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nikey.mapper.TbPowerMapper">
+
+    <resultMap id="powerInfoMap" type="com.nikey.bean.PowerInfo">
+        <result column="id" property="powerId"/>
+        <result column="customer_id" property="customerId"/>
+        <result column="power_id" property="deviceId"/>
+        <result column="is_group" property="isGroup"/>
+    </resultMap>
+
+    <select id="getPowerInfos" resultMap="powerInfoMap">
+        SELECT
+            *
+        FROM
+            tb_power_info
+    </select>
+
+    <resultMap id="hokoPointinfoMap" type="com.nikey.bean.HokoPointinfo">
+        <result column="customer_Id" property="companyId"/>
+        <result column="monitory_point_id" property="deviceId"/>
+        <result column="contact_mac" property="mcode"/>
+        <result column="company_for_short" property="companyForShort"/>
+        <result column="monitory_point_Name" property="deviceName"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="alarm_company_id" property="alarmCompanyId"/>
+    </resultMap>
+    
+    <select id="getHokoPointinfos" resultMap="hokoPointinfoMap">
+		SELECT
+		    p.customer_Id,
+		    monitory_point_id,
+		    contact_mac,
+		    company_for_short,
+		    monitory_point_Name
+		FROM
+		    tb_monitory_point_info p
+		LEFT JOIN tb_customer_info c ON c.customer_Id=p.customer_Id
+    </select>
+
+    <select id="getHokoPointinfo" resultMap="hokoPointinfoMap">
+        SELECT
+            customer_Id, monitory_point_id, contact_mac
+        FROM
+            tb_monitory_point_info
+        WHERE
+            customer_Id = #{companyId}
+        AND
+            monitory_point_id = #{deviceId}
+    </select>
+
+    <resultMap id="powerDemandMap" type="com.nikey.bean.PowerDemand">
+        <result column="power_id" property="powerId"/>
+        <result column="max_demand" property="maxDemand"/>
+        <result column="record_date" property="recordDate"/>
+        <result column="is_group" property="isGroup"/>
+        <result column="device_id" property="deviceId"/>
+    </resultMap>
+
+    <select id="getPowerDemands" resultMap="powerDemandMap">
+    <![CDATA[
+        SELECT
+            d.power_id,
+            d.max_demand,
+            d.record_date,
+            p.is_group,
+            p.power_id as device_id
+        FROM
+            tb_power_demand d,
+            tb_power_info p
+        WHERE
+            record_date >= #{start}
+        AND record_date < #{end}
+        AND d.power_id = p.id
+    ]]>
+    </select>
+
+    <select id="getPowerDemand" resultMap="powerDemandMap">
+    <![CDATA[
+        SELECT
+            d.power_id,
+            d.max_demand,
+            d.record_date,
+            p.is_group,
+            p.power_id as device_id
+        FROM
+            tb_power_demand d,
+            tb_power_info p
+        WHERE
+            record_date >= #{start}
+        AND record_date < #{end}
+        AND d.power_id = p.id
+        AND d.power_id = #{powerId}
+        LIMIT 1
+    ]]>
+    </select>
+    
+</mapper>

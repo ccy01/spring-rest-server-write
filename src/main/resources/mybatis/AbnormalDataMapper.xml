@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nikey.mapper.AbnormalDataMapper">
+
+
+    <select id="getEventDataById" resultType="hashmap">
+        <![CDATA[
+            SELECT *
+            FROM tb_alarm_event_type tr 
+            where tr.alarm_event_type_id=#{id}
+        ]]>
+    </select>
+    
+	
+	<select id="selectAlarmdata" resultType="hashmap">
+        <![CDATA[
+            SELECT
+                *
+            FROM
+                tb_alarm_data_h
+            WHERE
+                alarm_event_type_id IN (67,68)
+            AND monitory_point_id >= 1000
+            AND monitory_point_id <= 2000
+        ]]>
+    </select>
+    
+    <select id="selectAlarmdataHistoryCount" resultType="int">
+        <![CDATA[
+            SELECT
+                count(*)
+            FROM
+                tb_alarm_data_h
+            WHERE
+                tb_alarm_data_h.monitory_point_id = #{deviceId}
+            AND tb_alarm_data_h.alarm_event_type_id = #{eventType}
+            AND tb_alarm_data_h.alarm_start_time = #{startTime}
+        ]]>
+    </select>
+    <select id="selectTemperatreAlarmdataHistoryCount" resultType="int">
+    <![CDATA[
+        SELECT
+            count(*)
+        FROM
+            tb_alarm_data_temperature
+        WHERE
+            tb_alarm_data_temperature.temperature_point_id = #{deviceId}
+        AND tb_alarm_data_temperature.alarm_event_type_id = #{eventType}
+        AND tb_alarm_data_temperature.alarm_start_time = #{startTime}
+    ]]>
+    </select>
+    
+    <insert id="insertAlarmdataReal">
+        <![CDATA[
+            INSERT INTO tb_realtime_alarm (
+                event_Time,
+                monitory_point_id,
+                event_Id,
+                current_Value
+            )
+            VALUES
+                (
+                    #{startTime},
+                    #{deviceId},
+                    #{eventType},
+                    #{currenctValue}
+                ) ON DUPLICATE KEY UPDATE current_Value = #{currenctValue},event_Time = #{startTime}
+        ]]>
+    </insert>
+    
+    <insert id="insertCraftEpi">
+    	<![CDATA[
+    	   INSERT INTO tb_craft_epi (
+                id,
+                change_time,
+                epi,
+                operation_type,
+                isGroup
+            )
+            VALUES
+                (
+                ${deviceId}, 
+                #{changeTime}, 
+                #{epi}, 
+                #{operationType}, 
+                #{isGroup}
+                )
+    	]]>
+    </insert>
+    
+    <insert id="insertTemperatureAlarmdataReal">
+    <![CDATA[
+        INSERT INTO tb_realtime_alarm_temperature (
+            event_Time,
+            temperature_point_id,
+            event_Id,
+            current_Value
+        )
+        VALUES
+            (
+                #{startTime},
+                #{deviceId},
+                #{eventType},
+                #{currenctValue}
+            ) ON DUPLICATE KEY UPDATE current_Value = #{currenctValue}
+    ]]>
+    </insert>
+    
+    <delete id="deleteAlarmdataReal">
+        <![CDATA[
+            DELETE
+            FROM
+            tb_realtime_alarm
+            WHERE
+            event_Time <= #{startTime}
+            AND
+            monitory_point_id = #{deviceId}
+            AND
+            event_Id = #{eventType}
+        ]]>
+    </delete>
+    
+    <delete id="deleteTemperatureAlarmdataReal">
+    <![CDATA[
+        DELETE
+        FROM
+        tb_realtime_alarm_temperature
+        WHERE
+        event_Time <= #{startTime}
+        AND
+        temperature_point_id = #{deviceId}
+        AND
+        event_Id = #{eventType}
+    ]]>
+    </delete>
+    
+    <delete id="deleteAlarmdataHistory">
+        <![CDATA[
+            DELETE
+            FROM
+            tb_alarm_data_h
+            WHERE
+            alarm_start_time = #{startTime}
+            AND
+            monitory_point_id = #{deviceId}
+            AND
+            alarm_event_type_id = #{eventType}
+        ]]>
+    </delete>
+    
+    <delete id="deleteTemperatureAlarmdataHistory">
+    <![CDATA[
+        DELETE
+        FROM
+        tb_alarm_data_temperature
+        WHERE
+        alarm_start_time = #{startTime}
+        AND
+        temperature_point_id = #{deviceId}
+        AND
+        alarm_event_type_id = #{eventType}
+    ]]>
+    </delete>
+    
+    <insert id="insertAlarmdataHistory">
+        <![CDATA[
+            INSERT INTO tb_alarm_data_h (
+                alarm_start_time,
+                alarm_end_time,
+                monitory_point_id,
+                alarm_event_type_id,
+                current_Value,
+                duration
+            )
+            VALUES
+                (
+                    #{startTime},
+                    #{endTime},
+                    #{deviceId},
+                    #{eventType},
+                    #{currenctValue},
+                    #{duration}
+                )
+            ON DUPLICATE KEY UPDATE alarm_end_time = #{endTime} AND duration = #{duration}
+        ]]>
+    </insert>
+    
+    <insert id="insertTemperatureAlarmdataHistory">
+    <![CDATA[
+        INSERT INTO tb_alarm_data_temperature (
+            alarm_start_time,
+            alarm_end_time,
+            temperature_point_id,
+            alarm_event_type_id,
+            current_Value,
+            duration
+        )
+        VALUES
+            (
+                #{startTime},
+                #{endTime},
+                #{deviceId},
+                #{eventType},
+                #{currenctValue},
+                #{duration}
+            )
+        ON DUPLICATE KEY UPDATE alarm_end_time = #{endTime} AND duration = #{duration}
+    ]]>
+    </insert>
+    
+    
+    <!-- sperate line -->
+    
+    <select id="selectCommerrHistoryCount" resultType="int">
+        <![CDATA[
+            SELECT
+                count(*)
+            FROM
+                tb_communication_erro_h
+            WHERE
+                tb_communication_erro_h.monitory_point_id = #{deviceId}
+            AND tb_communication_erro_h.breakdown_type = #{eventType}
+            AND tb_communication_erro_h.breakdown_begin_time = #{startTime}
+        ]]>
+    </select>
+    
+    <insert id="insertCommerrReal">
+        <![CDATA[
+            INSERT INTO tb_communication_erro (
+                breakdown_begin_time,
+                monitory_point_id,
+                breakdown_type,
+                is_commnunication_terminal
+            )
+            VALUES
+                (
+                    #{startTime},
+                    #{deviceId},
+                    #{eventType},
+                    0
+                ) ON DUPLICATE KEY UPDATE is_commnunication_terminal = 0
+        ]]>
+    </insert>
+    
+    <delete id="deleteCommerrReal">
+        <![CDATA[
+            DELETE
+            FROM
+            tb_communication_erro
+            WHERE
+            breakdown_begin_time <= #{startTime}
+            AND
+            monitory_point_id = #{deviceId}
+            AND
+            breakdown_type = #{eventType}
+        ]]>
+    </delete>
+    
+    <delete id="deleteCommerrHistory">
+        <![CDATA[
+            DELETE
+            FROM
+            tb_communication_erro_h
+            WHERE
+            breakdown_begin_time = #{startTime}
+            AND
+            monitory_point_id = #{deviceId}
+            AND
+            breakdown_type = #{eventType}
+        ]]>
+    </delete>
+    
+    <insert id="insertCommerrHistory">
+        <![CDATA[
+            INSERT INTO tb_communication_erro_h (
+                breakdown_begin_time,
+                breakdown_end_time,
+                monitory_point_id,
+                breakdown_type,
+                is_communication_terminal
+            )
+            VALUES
+                (
+                    #{startTime},
+                    #{endTime},
+                    #{deviceId},
+                    #{eventType},
+                    0
+                )
+        ]]>
+    </insert>
+	
+</mapper>

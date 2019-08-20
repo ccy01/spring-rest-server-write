@@ -1,0 +1,28 @@
+如何开展WEB后台Service编写的工作？
+
+1.在post或get请求过来的数据中，必须要有一个service字段用于标识你的业务类的名称，例如{service=PowerFactor}，
+Spring Controller默认会根据这个字段去反射一个com.nikey.service.PowerfactorGetDataFromHbaseService类(PowerFactor首字母大写，其他的小写)，
+因此，首先你需要保证：你在com.nikey.service有相应的业务类+你的post或get请求带有标识你业务类名称的字段，规定使用{service=xxx}的格式
+
+2.继续以PowerfactorGetDataFromHbaseService类为例，你需要在里面实现getDataFromHbase方法，具体逻辑可参照com.nikey.service.MonitordataGetDataFromHbaseService类，
+其中，singleJob方法是只请求一个监测点数据，同时只查询一个htable的逻辑；multiJob方法可查询多个或一个监测点，同时可查询多个htable；但是注意，两类方法都是默认只支持一个companyId的查询，
+如果你需要更多逻辑，请扩展com.nikey.util.ScanUtil类
+
+3.业务类的编写中，要注意的是：
+1)用到哪些htable就构造相应的mapper类，如下例用到的是monitordata表（一共有哪些表可参照src/config.properties下的<## htable mapper>部分）：
+HTableMapper mapper = HTableMapperFactory.instance().getHTableMapper(ClassNameUtil.constructClassNameForMapper(PropUtil.getString("htable_mapper_monitordata")));
+2)要查询哪些字段(qualifier)就在ScanUtil.defaultSetUpScan传进相应的字段，如下例所示（表示要查询monitordata的Ua和Ub和Uc三个字段）：
+ScanUtil.defaultSetUpScan(request, PropUtil.getString("htable_mapper_monitordata"), new String[]{"Ua", "Ub", "Uc"});
+注：在src/qualifier_mapping.properties下可查询hbase支持查询的字段，如monitordata_Ua，表示支持monitordata表的Ua字段
+3)关于如何组织JSON，其原则是 DeviceId-->Htable-->Qulifier，即从DeviceId开始，然后区分不同Htable的结果，然后区分不同qulifier的结果，具体请参照com.nikey.service.PowerfactorGetDataFromHbaseService类的
+multiJob方法
+
+4.关于Web的post或get请求参数，必须带有以下几个参数
+1)非电度的请求：{CompanyId,DeviceId,StartTime,EndTime},其中CompanyId和DeviceId必须为整数，StartTime,EndTime需同时为long型或同时为'yyyy-MM-dd HH:mm:ss'字符串类型
+2)电度的请求：{CompanyId,DeviceId,StartTime,EndTime,Type},其中Type为整型,0表示小时电度,1表示日电度
+
+“欧阳除了需要编写业务类外，还需要编写HTableMapper的实现，具体参照com.nikey.hbase包下面的例子”
+每加完一个mapper需要在src/config.properties中的<## htable mapper>一栏加上对应关系，如新增了MaxvalueHTableMapper(maxvalue的首字母大写)，则需要添加：
+htable_mapper_maxvalue=maxvalue(统一小写)
+添加完后，使用下面的方法就可以获取相应的HTableMapper用于scan的操作：
+HTableMapper mapper = HTableMapperFactory.instance().getHTableMapper(ClassNameUtil.constructClassNameForMapper(PropUtil.getString("htable_mapper_maxvalue")));
